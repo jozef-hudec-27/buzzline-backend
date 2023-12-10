@@ -1,9 +1,8 @@
-import { Router, Request, Response } from 'express'
+import { Router } from 'express'
+import * as chatsController from '../controllers/chatsController'
 
 const router = Router()
 
-router.get('/', (req: Request, res: Response) => {
-  res.send('api')
-})
+router.get('/chats', chatsController.index)
 
 export default router
