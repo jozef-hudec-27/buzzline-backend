@@ -5,7 +5,10 @@ import createError from 'http-errors'
 import logger from 'morgan'
 import dotenv from 'dotenv'
 
+import dbConnect from './mongo-config'
+
 dotenv.config()
+dbConnect()
 
 // routers
 import apiRouter from './routers/apiRouter'
