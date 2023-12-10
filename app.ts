@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction, Errback } from 'express'
+import express, { Express, Request, Response, NextFunction } from 'express'
 import path from 'path'
 import cookieParser from 'cookie-parser'
 import createError from 'http-errors'
@@ -12,6 +12,7 @@ dbConnect()
 
 // routers
 import apiRouter from './routers/apiRouter'
+import authRouter from './routers/authRouter'
 
 const app: Express = express()
 
@@ -22,7 +23,8 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', apiRouter)
+app.use('/api', apiRouter)
+app.use('/auth', authRouter)
 
 // catch 404 and forward to error handler
 app.use((req: Request, res: Response, next: NextFunction) => {

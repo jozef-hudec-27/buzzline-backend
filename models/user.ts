@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, maxlength: 100 },
   passwordEncrypted: { type: String, required: true },
   refreshTokens: { type: [String], default: [] },
-  chatToken: { String, default: generateChatToken, unique: true }, // Used to create chat with user
+  chatToken: { type: String, default: generateChatToken, unique: true }, // Used to create chat with user
 })
 
 const User = mongoose.model('User', userSchema)
