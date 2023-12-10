@@ -33,13 +33,12 @@ export const create = [
     }
 
     const user = await User.findOne({ chatToken })
+    const me = req.user as User
 
-    if (!user) {
+    if (!user || user._id === me._id) {
       res.status(404).json({ message: 'User not found.' })
       return
     }
-
-    const me = req.user as User
 
     let chat = await Chat.findOne({ users: [user._id, me._id] })
 

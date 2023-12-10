@@ -7,7 +7,7 @@ type User = {
   lastName: string
   passwordEncrypted: string
   refreshTokens: string[]
-  chatToken: Promise<string>
+  chatToken: string
   _id: mongoose.Types.ObjectId
 }
 
@@ -17,7 +17,15 @@ const userSchema = new mongoose.Schema<User>({
   lastName: { type: String, required: true, maxlength: 100 },
   passwordEncrypted: { type: String, required: true },
   refreshTokens: { type: [String], default: [] },
-  chatToken: { type: String, default: generateChatToken, unique: true }, // Used to create chat with user
+  chatToken: { type: String, unique: true }, // Used to create chat with user
+})
+
+userSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    this.chatToken = await generateChatToken()
+  }
+
+  next()
 })
 
 const User = mongoose.model('User', userSchema)

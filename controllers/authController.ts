@@ -26,6 +26,8 @@ export const register = [
       if (user) throw new Error('User with that email already exists.')
     })
     .escape(),
+  body('firstName', 'First name must be between 1 and 100 characters.').trim().isLength({ min: 1, max: 100 }).escape(),
+  body('lastName', 'Last name must be between 1 and 100 characters.').trim().isLength({ min: 1, max: 100 }).escape(),
   body('password', 'Password must be between 6 and 64 characters!').trim().isLength({ min: 6, max: 64 }),
   body('passwordConfirmation').custom((value, { req }) => {
     if (value !== req.body.password) throw new Error('Passwords do not match.')
@@ -42,6 +44,8 @@ export const register = [
       try {
         const user = new User({
           email: req.body.email,
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
           passwordEncrypted: hashedPassword,
         })
 
