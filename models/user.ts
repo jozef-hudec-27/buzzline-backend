@@ -1,7 +1,17 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
 
-const userSchema = new mongoose.Schema({
+type User = {
+  email: string
+  firstName: string
+  lastName: string
+  passwordEncrypted: string
+  refreshTokens: string[]
+  chatToken: Promise<string>
+  _id: mongoose.Types.ObjectId
+}
+
+const userSchema = new mongoose.Schema<User>({
   email: { type: String, required: true, unique: true, maxlength: 100 },
   firstName: { type: String, required: true, maxlength: 100 },
   lastName: { type: String, required: true, maxlength: 100 },

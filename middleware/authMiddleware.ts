@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import passport from 'passport'
 
-const checkTokenExpiration = (req: Request, res: Response, next: NextFunction) => {
+function checkTokenExpiration(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Response<any, Record<string, any>> | undefined {
   const token = req.headers.authorization?.split(' ')[1]
 
   if (!token) {
@@ -20,28 +24,29 @@ const checkTokenExpiration = (req: Request, res: Response, next: NextFunction) =
   })
 }
 
+function passportAuthenticate(req: Request, res: Response, next: NextFunction): void {
+  passport.authenticate('jwt', { session: false }, (err: any, user: any, info: any) => {
+    if (err) {
+      return next(err)
+    }
+
+    if (!user) {
+      if (info === 'Forbidden') {
+        return res.status(403).json({ message: 'Forbidden' })
+      }
+
+      return res.status(401).json({ message: 'Unauthorized' })
+    }
+
+    req.user = user
+    next()
+  })(req, res, next)
+}
+
+type AllowedProtectMiddleware = typeof checkTokenExpiration | typeof passportAuthenticate
+
 export const protectRoute = () => {
-  const middleware: any[] = [checkTokenExpiration]
-
-  middleware.push((req: Request, res: Response, next: NextFunction) => {
-    // Override passport's default behavior with custom callback
-    passport.authenticate('jwt', { session: false }, (err: any, user: any, info: any) => {
-      if (err) {
-        return next(err)
-      }
-
-      if (!user) {
-        if (info === 'Forbidden') {
-          return res.status(403).json({ message: 'Forbidden' })
-        }
-
-        return res.status(401).json({ message: 'Unauthorized' })
-      }
-
-      req.user = user
-      next()
-    })(req, res, next)
-  })
+  const middleware: AllowedProtectMiddleware[] = [checkTokenExpiration, passportAuthenticate]
 
   return middleware
 }
