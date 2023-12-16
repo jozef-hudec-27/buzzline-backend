@@ -29,7 +29,7 @@ export const register = [
   body('firstName', 'First name must be between 1 and 100 characters.').trim().isLength({ min: 1, max: 100 }).escape(),
   body('lastName', 'Last name must be between 1 and 100 characters.').trim().isLength({ min: 1, max: 100 }).escape(),
   body('password', 'Password must be between 6 and 64 characters!').trim().isLength({ min: 6, max: 64 }),
-  body('passwordConfirmation').custom((value, { req }) => {
+  body('confirmPassword').custom((value, { req }) => {
     if (value !== req.body.password) throw new Error('Passwords do not match.')
 
     return true
@@ -85,7 +85,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
   })
   const refreshToken = jwt.sign({ user: { _id } }, process.env.JWT_SECRET || '', { expiresIn: '7d' })
 
-  await User.findByIdAndUpdate(_id, { $push: { tokens: refreshToken } })
+  await User.findByIdAndUpdate(_id, { $push: { refreshTokens: refreshToken } })
 
   res.cookie('refreshToken', refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS)
 
@@ -102,7 +102,7 @@ export const refresh = [
       return
     }
 
-    const isInDB = await User.findOne({ tokens: refreshToken })
+    const isInDB = await User.findOne({ refreshTokens: refreshToken })
 
     if (!isInDB) {
       res.status(401).json({ message: 'Invalid token.' })
@@ -119,7 +119,7 @@ export const refresh = [
 
     // Refresh token has expired
     if (decoded.exp && decoded.exp < Date.now() / 1000) {
-      await User.findOneAndUpdate({ tokens: refreshToken }, { tokens: [] })
+      await User.findOneAndUpdate({ refreshTokens: refreshToken }, { refreshTokens: [] })
 
       res.clearCookie('refreshToken', REFRESH_TOKEN_COOKIE_OPTIONS)
 
@@ -164,7 +164,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
     return
   }
 
-  const user = await User.findOneAndUpdate({ tokens: refreshToken }, { tokens: [] }, { new: true })
+  const user = await User.findOneAndUpdate({ refreshTokens: refreshToken }, { refreshTokens: [] }, { new: true })
 
   res.clearCookie('refreshToken', REFRESH_TOKEN_COOKIE_OPTIONS)
 
