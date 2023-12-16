@@ -2,7 +2,7 @@ import asyncHandler from 'express-async-handler'
 import { body, validationResult } from 'express-validator'
 
 import Chat from '../models/chat'
-import User from '../models/user'
+import User, { User as TUser } from '../models/user'
 import { protectRoute } from '../middleware/authMiddleware'
 
 import { Request, Response } from 'express'
@@ -11,7 +11,7 @@ export const index = [
   ...protectRoute(),
 
   asyncHandler(async (req: Request, res: Response) => {
-    const user = req.user as User
+    const user = req.user as TUser
     const chats = await Chat.find({ users: user?._id }).populate('users')
     res.json(chats)
   }),
@@ -33,7 +33,7 @@ export const create = [
     }
 
     const user = await User.findOne({ chatToken })
-    const me = req.user as User
+    const me = req.user as TUser
 
     if (!user || user._id === me._id) {
       res.status(404).json({ message: 'User not found.' })

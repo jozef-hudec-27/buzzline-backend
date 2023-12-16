@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
 
-type User = {
+export type User = {
   email: string
   firstName: string
   lastName: string
