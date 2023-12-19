@@ -12,8 +12,39 @@ export const index = [
 
   asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as TUser
-    const chats = await Chat.find({ users: user?._id }).populate('users')
+    const chats = await Chat.find({ users: user?._id })
+      .populate('users', 'firstName lastName')
+      .populate('newestMessage', 'content createdAt readBy sender')
+      .sort({ 'newestMessage.createdAt': -1 })
+      .lean()
+
+    chats.forEach((chat) => {
+      chat.users = chat.users.filter((u) => u._id.toString() !== user._id.toString())
+    })
+
     res.json(chats)
+  }),
+]
+
+export const show = [
+  ...protectRoute(),
+
+  asyncHandler(async (req: Request, res: Response) => {
+    const { chatId } = req.params
+    const user = req.user as TUser
+
+    const chat = await Chat.findOne({ _id: chatId, users: user._id })
+      .populate('users', 'firstName lastName email')
+      .lean()
+
+    if (!chat) {
+      res.status(404).json({ message: 'Chat not found.' })
+      return
+    }
+
+    chat.users = chat.users.filter((u) => u._id.toString() !== user._id.toString())
+
+    res.json(chat)
   }),
 ]
 
