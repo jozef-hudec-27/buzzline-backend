@@ -1,6 +1,7 @@
 import app from '../app'
 import debug from 'debug'
 import http from 'http'
+import socketConfig from '../socket-config'
 
 const debug_ = debug('express-ts:server')
 
@@ -8,6 +9,8 @@ const port = normalizePort(process.env.PORT || '3000')
 app.set('port', port)
 
 const server = http.createServer(app)
+
+socketConfig(server)
 
 server.listen(port)
 server.on('error', onError)
