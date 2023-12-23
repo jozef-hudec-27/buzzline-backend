@@ -12,11 +12,17 @@ export const index = [
 
   asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as TUser
-    const chats = await Chat.find({ users: user?._id })
+    const chats = await Chat.find({ users: user._id })
       .populate('users', 'firstName lastName')
       .populate('newestMessage', 'content createdAt readBy sender')
-      .sort({ 'newestMessage.createdAt': -1 })
       .lean()
+
+    //   Sort by newest message, if newestMessage is null, put it at the end
+    chats.sort((a: any, b: any) => {
+      if (!a.newestMessage) return 1
+      if (!b.newestMessage) return -1
+      return b.newestMessage.createdAt - a.newestMessage.createdAt
+    })
 
     chats.forEach((chat) => {
       chat.users = chat.users.filter((u) => u._id.toString() !== user._id.toString())
