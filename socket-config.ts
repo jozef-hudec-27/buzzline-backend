@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 
 import Message from './models/message'
 import User from './models/user'
+import Chat from './models/chat'
 
 interface CustomSocket extends Socket {
   userInfo: {
@@ -11,29 +12,41 @@ interface CustomSocket extends Socket {
       _id: string
     }
   }
+  userId: string
 }
 
 function handleJoinRoom(socket: CustomSocket, data: any) {
   socket.rooms.forEach((room) => {
+    if (room === socket.userId) return
+
     socket.leave(room)
   })
 
   socket.join(data)
 }
 
-async function handleMessage(socket: CustomSocket, data: any) {
+async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   const user = await User.findById(socket.userInfo.user._id)
   if (!user) {
     return
   }
 
-  const message = new Message({
+  if (data.content.length > 500) {
+    return socket.emit('error', 'Message is too long')
+  }
+
+  let message = new Message({
     chat: data.chat,
     sender: user._id,
     content: data.content,
+    // @ts-ignore
+    readBy: (await io.in(data.chat).fetchSockets()).map((sc) => sc.userId),
   })
 
-  await message.save()
+  await Chat.findByIdAndUpdate(data.chat, { newestMessage: message._id })
+
+  message = await message.save()
+  message = await message.populate('sender', 'firstName lastName')
 
   socket.to(data.chat).emit('message', message)
 }
@@ -55,14 +68,23 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
       }
 
       //   @ts-ignore
+      socket.userId = decoded?.user?._id
+
+      //   @ts-ignore
       socket.userInfo = decoded
       next()
     })
   }).on('connection', (socket: Socket) => {
     const customSocket = socket as CustomSocket
 
-    socket.on('joinRoom', (data) => handleJoinRoom(customSocket, data))
+    customSocket.join(customSocket.userId)
 
-    socket.on('message', async (data) => await handleMessage(customSocket, data))
+    customSocket.on('joinRoom', (data) => handleJoinRoom(customSocket, data))
+
+    customSocket.on('message', async (data) => await handleMessage(customSocket, io, data))
+
+    customSocket.on('notification', (data) => {
+      io.to(data.to).emit('notification', data)
+    })
   })
 }
