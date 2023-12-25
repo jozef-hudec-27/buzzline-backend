@@ -10,6 +10,25 @@ interface CustomSocket extends Socket {
   userId: string
 }
 
+async function sendOnlineStatus(me: string, io: Server, isOnline: boolean) {
+  const friends = new Set()
+  const chats = await Chat.find({ users: me })
+
+  chats.forEach((chat) => {
+    chat.users.forEach((friend) => {
+      const friendId = friend._id.toString()
+
+      if (friendId === me) return
+
+      //   Prevent sending online status multiple times to the same user if they are in multiple chats
+      if (!friends.has(friendId)) {
+        friends.add(friendId)
+        io.to(friendId).emit('onlineStatus', { userId: me, isOnline })
+      }
+    })
+  })
+}
+
 function handleJoinRoom(socket: CustomSocket, data: any) {
   socket.rooms.forEach((room) => {
     if (room === socket.userId) return
@@ -70,6 +89,9 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
     const customSocket = socket as CustomSocket
 
     customSocket.join(customSocket.userId)
+    sendOnlineStatus(customSocket.userId, io, true)
+
+    customSocket.on('disconnect', () => sendOnlineStatus(customSocket.userId, io, false))
 
     customSocket.on('joinRoom', (data) => handleJoinRoom(customSocket, data))
 
@@ -77,6 +99,10 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
 
     customSocket.on('notification', (data) => {
       io.to(data.to).emit('notification', data)
+    })
+
+    customSocket.on('onlineStatusResponse', (data) => {
+      io.to(data.to).emit('onlineStatus', { userId: customSocket.userId, isOnline: true, isResponse: true })
     })
   })
 }
