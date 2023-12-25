@@ -18,6 +18,7 @@ router.get('/me', ...protectRoute(), (req: Request, res: Response) => {
 
 router.get('/chats', chatsController.index)
 router.get('/chats/:chatId', chatsController.show)
+router.post('/chats/:chatId/messages/read', chatsController.readUnreadMessages)
 
 router.get('/chats/:chatId/messages', messagesController.index)
 

@@ -7,11 +7,6 @@ import User from './models/user'
 import Chat from './models/chat'
 
 interface CustomSocket extends Socket {
-  userInfo: {
-    user: {
-      _id: string
-    }
-  }
   userId: string
 }
 
@@ -26,7 +21,7 @@ function handleJoinRoom(socket: CustomSocket, data: any) {
 }
 
 async function handleMessage(socket: CustomSocket, io: Server, data: any) {
-  const user = await User.findById(socket.userInfo.user._id)
+  const user = await User.findById(socket.userId)
   if (!user) {
     return
   }
@@ -69,9 +64,6 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
 
       //   @ts-ignore
       socket.userId = decoded?.user?._id
-
-      //   @ts-ignore
-      socket.userInfo = decoded
       next()
     })
   }).on('connection', (socket: Socket) => {

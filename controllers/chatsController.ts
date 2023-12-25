@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler'
 import { body, validationResult } from 'express-validator'
 
 import Chat from '../models/chat'
+import Message from '../models/message'
 import User, { User as TUser } from '../models/user'
 import { protectRoute } from '../middleware/authMiddleware'
 
@@ -41,6 +42,7 @@ export const show = [
 
     const chat = await Chat.findOne({ _id: chatId, users: user._id })
       .populate('users', 'firstName lastName email')
+      .populate('newestMessage', 'content createdAt readBy sender')
       .lean()
 
     if (!chat) {
@@ -90,5 +92,34 @@ export const create = [
 
     await chat.save()
     res.status(201).json(chat)
+  }),
+]
+
+export const readUnreadMessages = [
+  ...protectRoute(),
+
+  asyncHandler(async (req: Request, res: Response) => {
+    const { chatId } = req.params
+
+    if (!chatId) {
+      res.status(422).json({ message: 'Chat not found.' })
+      return
+    }
+
+    const user = req.user as TUser
+
+    const chat = await Chat.findOne({ _id: chatId, users: user._id })
+
+    if (!chat) {
+      res.status(404).json({ message: 'Chat not found.' })
+      return
+    }
+
+    const unreadMessages = await Message.find({ chat: chat._id, readBy: { $ne: user._id }, sender: { $ne: user._id } })
+    unreadMessages.forEach(async (message) => {
+      await Message.updateOne({ _id: message._id }, { $addToSet: { readBy: user._id } })
+    })
+
+    res.status(204).end()
   }),
 ]
