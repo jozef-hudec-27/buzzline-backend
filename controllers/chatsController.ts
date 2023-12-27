@@ -14,7 +14,7 @@ export const index = [
   asyncHandler(async (req: Request, res: Response) => {
     const user = req.user as TUser
     const chats = await Chat.find({ users: user._id })
-      .populate('users', 'firstName lastName')
+      .populate('users', 'firstName lastName avatarUrl')
       .populate('newestMessage', 'content createdAt readBy sender')
       .lean()
 
@@ -41,7 +41,7 @@ export const show = [
     const user = req.user as TUser
 
     const chat = await Chat.findOne({ _id: chatId, users: user._id })
-      .populate('users', 'firstName lastName email')
+      .populate('users', 'firstName lastName email avatarUrl')
       .populate('newestMessage', 'content createdAt readBy sender')
       .lean()
 

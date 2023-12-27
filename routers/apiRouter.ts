@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express'
 
 import * as chatsController from '../controllers/chatsController'
 import * as messagesController from '../controllers/messagesController'
+import * as meController from '../controllers/meController'
 import { protectRoute } from '../middleware/authMiddleware'
 
 import { User as TUser } from '../models/user'
@@ -15,6 +16,7 @@ router.get('/me', ...protectRoute(), (req: Request, res: Response) => {
   const { refreshTokens, passwordEncrypted, ...userWithoutTokens } = user.toObject()
   res.json(userWithoutTokens)
 })
+router.post('/me/avatar', meController.updateAvatar)
 
 router.get('/chats', chatsController.index)
 router.get('/chats/:chatId', chatsController.show)

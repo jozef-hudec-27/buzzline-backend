@@ -24,7 +24,7 @@ export const index = [
 
     const messages = await Message.find({ chat: chat._id })
       .sort({ createdAt: 1 })
-      .populate('sender', 'firstName lastName')
+      .populate('sender', 'firstName lastName avatarUrl')
       .populate('readBy', 'firstName lastName')
 
     res.json(messages)

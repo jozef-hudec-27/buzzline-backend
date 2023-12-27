@@ -8,6 +8,8 @@ export type User = {
   passwordEncrypted: string
   refreshTokens: string[]
   chatToken: string
+  avatarUrl: string
+  avatarPublicId: string
   _id: mongoose.Types.ObjectId
 }
 
@@ -18,6 +20,7 @@ const userSchema = new mongoose.Schema<User>({
   passwordEncrypted: { type: String, required: true },
   refreshTokens: { type: [String], default: [] },
   chatToken: { type: String, unique: true }, // Used to create chat with user
+  avatarUrl: { type: String, default: process.env.DEFAULT_AVATAR_URL },
 })
 
 userSchema.pre('save', async function (next) {
@@ -26,6 +29,10 @@ userSchema.pre('save', async function (next) {
   }
 
   next()
+})
+
+userSchema.virtual('avatarPublicId').get(function () {
+  return this.avatarUrl.split('/').pop()?.split('.')[0]
 })
 
 const User = mongoose.model('User', userSchema)
