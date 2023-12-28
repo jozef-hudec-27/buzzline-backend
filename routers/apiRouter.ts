@@ -21,6 +21,7 @@ router.post('/me/avatar', meController.updateAvatar)
 router.get('/chats', chatsController.index)
 router.get('/chats/:chatId', chatsController.show)
 router.post('/chats/:chatId/messages/read', chatsController.readUnreadMessages)
+router.post('/chats', chatsController.create)
 
 router.get('/chats/:chatId/messages', messagesController.index)
 

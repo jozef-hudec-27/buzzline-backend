@@ -79,7 +79,7 @@ export const create = [
       return
     }
 
-    let chat = await Chat.findOne({ users: [user._id, me._id] })
+    let chat = await Chat.findOne({ users: { $all: [user._id, me._id] } })
 
     if (chat) {
       res.status(409).json({ message: 'Chat already exists.' })
@@ -91,6 +91,7 @@ export const create = [
     })
 
     await chat.save()
+    chat = await chat.populate('users', 'firstName lastName avatarUrl')
     res.status(201).json(chat)
   }),
 ]
