@@ -1,10 +1,13 @@
 import { Server as S, IncomingMessage, ServerResponse } from 'http'
 import { Server, Socket } from 'socket.io'
 import jwt from 'jsonwebtoken'
+import { fileTypeFromBuffer } from 'file-type'
+import { Readable } from 'stream'
 
 import Message from './models/message.js'
 import User from './models/user.js'
 import Chat from './models/chat.js'
+import { cloudinaryInstance } from './cloudinary-config.js'
 
 interface CustomSocket extends Socket {
   userId: string
@@ -45,14 +48,48 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     return
   }
 
-  if (data.content.length > 500) {
+  let voiceClipUrl = null
+
+  if (data.voiceClip) {
+    const voiceClipBuffer = data.voiceClip as Buffer
+
+    if (voiceClipBuffer.length > 5 * 1024 * 1024) {
+      return socket.emit('error', 'Voice clip is too large')
+    }
+
+    const type = await fileTypeFromBuffer(voiceClipBuffer)
+    if (!type || !type.mime.startsWith('audio')) {
+      return socket.emit('error', 'Invalid voice clip')
+    }
+
+    // Upload audio file to Cloudinary
+    const stream = Readable.from(voiceClipBuffer)
+    try {
+      voiceClipUrl = await new Promise((resolve, reject) => {
+        const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
+          { folder: 'buzzline', resource_type: 'auto' },
+          (err, res) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(res?.url)
+            }
+          }
+        )
+        stream.pipe(cldUploadStream)
+      })
+    } catch (e) {
+      return socket.emit('error', 'Error uploading voice clip')
+    }
+  } else if (data.content?.length > 500) {
     return socket.emit('error', 'Message is too long')
   }
 
   let message = new Message({
     chat: data.chat,
     sender: user._id,
-    content: data.content,
+    content: data.content || '',
+    voiceClipUrl: voiceClipUrl,
     // @ts-ignore
     readBy: (await io.in(data.chat).fetchSockets()).map((sc) => sc.userId),
   })
@@ -66,7 +103,7 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
 }
 
 export default function (server: S<typeof IncomingMessage, typeof ServerResponse>) {
-  const io = new Server(server, { cors: { origin: 'http://localhost:3000' } })
+  const io = new Server(server, { cors: { origin: 'http://localhost:3000' }, maxHttpBufferSize: 5e6 }) // 5mb max buffer size
 
   //   attach user to socket
   io.use((socket, next) => {
