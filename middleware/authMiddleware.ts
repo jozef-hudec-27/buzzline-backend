@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import passport from 'passport'
-import User from '../models/user'
 
 function checkTokenExpiration(
   req: Request,

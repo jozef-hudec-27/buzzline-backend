@@ -2,9 +2,9 @@ import { Server as S, IncomingMessage, ServerResponse } from 'http'
 import { Server, Socket } from 'socket.io'
 import jwt from 'jsonwebtoken'
 
-import Message from './models/message'
-import User from './models/user'
-import Chat from './models/chat'
+import Message from './models/message.js'
+import User from './models/user.js'
+import Chat from './models/chat.js'
 
 interface CustomSocket extends Socket {
   userId: string

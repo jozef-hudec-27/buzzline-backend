@@ -1,8 +1,8 @@
-import { protectRoute } from '../middleware/authMiddleware'
-import upload from '../multer'
-import { cloudinaryInstance } from '../cloudinary-config'
+import { protectRoute } from '../middleware/authMiddleware.js'
+import upload from '../multer.js'
+import { cloudinaryInstance } from '../cloudinary-config.js'
 
-import User, { User as TUser } from '../models/user'
+import User, { User as TUser } from '../models/user.js'
 
 import { Request, Response } from 'express'
 

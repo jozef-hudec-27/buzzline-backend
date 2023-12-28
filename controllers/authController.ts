@@ -1,10 +1,9 @@
-import User from '../models/user'
+import User from '../models/user.js'
 import { body, validationResult } from 'express-validator'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { Request, Response, NextFunction, CookieOptions } from 'express'
-import { protectRoute } from '../middleware/authMiddleware'
 
 const REFRESH_TOKEN_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,

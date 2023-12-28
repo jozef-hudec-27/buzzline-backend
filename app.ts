@@ -1,5 +1,4 @@
 import express, { Express, Request, Response, NextFunction } from 'express'
-import path from 'path'
 import cookieParser from 'cookie-parser'
 import createError from 'http-errors'
 import logger from 'morgan'
@@ -7,16 +6,16 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import passport from 'passport'
 
-import dbConnect from './mongo-config'
-import passportConfig from './passport-config'
+import dbConnect from './mongo-config.js'
+import passportConfig from './passport-config.js'
 
 dotenv.config()
 dbConnect()
 passportConfig(passport)
 
 // routers
-import apiRouter from './routers/apiRouter'
-import authRouter from './routers/authRouter'
+import apiRouter from './routers/apiRouter.js'
+import authRouter from './routers/authRouter.js'
 
 const app: Express = express()
 
@@ -25,7 +24,6 @@ app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(passport.initialize())
 

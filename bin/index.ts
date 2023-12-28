@@ -1,7 +1,7 @@
-import app from '../app'
+import app from '../app.js'
 import debug from 'debug'
 import http from 'http'
-import socketConfig from '../socket-config'
+import socketConfig from '../socket-config.js'
 
 const debug_ = debug('express-ts:server')
 

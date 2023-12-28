@@ -1,11 +1,11 @@
 import { Request, Response, Router } from 'express'
 
-import * as chatsController from '../controllers/chatsController'
-import * as messagesController from '../controllers/messagesController'
-import * as meController from '../controllers/meController'
-import { protectRoute } from '../middleware/authMiddleware'
+import * as chatsController from '../controllers/chatsController.js'
+import * as messagesController from '../controllers/messagesController.js'
+import * as meController from '../controllers/meController.js'
+import { protectRoute } from '../middleware/authMiddleware.js'
 
-import { User as TUser } from '../models/user'
+import { User as TUser } from '../models/user.js'
 
 const router = Router()
 

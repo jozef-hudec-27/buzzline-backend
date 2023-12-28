@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 
-import User from './models/user'
+import User from './models/user.js'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 
 import { Request } from 'express'

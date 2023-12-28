@@ -1,10 +1,9 @@
 import asyncHandler from 'express-async-handler'
-import { body, validationResult } from 'express-validator'
 
-import Message from '../models/message'
-import Chat from '../models/chat'
-import { User as TUser } from '../models/user'
-import { protectRoute } from '../middleware/authMiddleware'
+import Message from '../models/message.js'
+import Chat from '../models/chat.js'
+import { User as TUser } from '../models/user.js'
+import { protectRoute } from '../middleware/authMiddleware.js'
 
 import { Request, Response } from 'express'
 
