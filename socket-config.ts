@@ -49,6 +49,7 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   }
 
   let voiceClipUrl = null
+  let imageUrl = null
 
   if (data.voiceClip) {
     const voiceClipBuffer = data.voiceClip as Buffer
@@ -58,7 +59,7 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     }
 
     const type = await fileTypeFromBuffer(voiceClipBuffer)
-    if (!type || !type.mime.startsWith('audio')) {
+    if (!type || type.ext !== 'webm') {
       return socket.emit('error', 'Invalid voice clip')
     }
 
@@ -67,12 +68,12 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     try {
       voiceClipUrl = await new Promise((resolve, reject) => {
         const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
-          { folder: 'buzzline', resource_type: 'auto' },
+          { folder: 'buzzline', resource_type: 'auto', secure: true },
           (err, res) => {
             if (err) {
               reject(err)
             } else {
-              resolve(res?.url)
+              resolve(res?.secure_url)
             }
           }
         )
@@ -80,6 +81,37 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
       })
     } catch (e) {
       return socket.emit('error', 'Error uploading voice clip')
+    }
+  } else if (data.image) {
+    const imageBuffer = data.image as Buffer
+
+    if (imageBuffer.length > 5 * 1024 * 1024) {
+      return socket.emit('error', 'Image is too large')
+    }
+
+    const type = await fileTypeFromBuffer(imageBuffer)
+    if (!type || !type.mime.startsWith('image')) {
+      return socket.emit('error', 'Invalid image')
+    }
+
+    // Upload image to Cloudinary
+    const stream = Readable.from(imageBuffer)
+    try {
+      imageUrl = await new Promise((resolve, reject) => {
+        const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
+          { folder: 'buzzline', resource_type: 'auto', secure: true },
+          (err, res) => {
+            if (err) {
+              reject(err)
+            } else {
+              resolve(res?.secure_url)
+            }
+          }
+        )
+        stream.pipe(cldUploadStream)
+      })
+    } catch (e) {
+      return socket.emit('error', 'Error uploading image')
     }
   } else if (data.content?.length > 500) {
     return socket.emit('error', 'Message is too long')
@@ -90,6 +122,7 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     sender: user._id,
     content: data.content || '',
     voiceClipUrl: voiceClipUrl,
+    imageUrl: imageUrl,
     // @ts-ignore
     readBy: (await io.in(data.chat).fetchSockets()).map((sc) => sc.userId),
   })

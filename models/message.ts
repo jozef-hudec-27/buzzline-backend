@@ -5,6 +5,7 @@ const messageSchema = new mongoose.Schema({
   sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   content: { type: String, maxlength: 500, default: '' },
   voiceClipUrl: { type: String },
+  imageUrl: { type: String },
   readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
   createdAt: { type: Date, default: Date.now },
 })
