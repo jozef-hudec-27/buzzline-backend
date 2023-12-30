@@ -15,7 +15,7 @@ export const index = [
     const user = req.user as TUser
     const chats = await Chat.find({ users: user._id })
       .populate('users', 'firstName lastName avatarUrl')
-      .populate('newestMessage', 'content createdAt readBy sender')
+      .populate('newestMessage', 'content createdAt readBy sender voiceClipUrl imageUrl')
       .lean()
 
     //   Sort by newest message, if newestMessage is null, put it at the end

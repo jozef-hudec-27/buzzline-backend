@@ -42,6 +42,24 @@ function handleJoinRoom(socket: CustomSocket, data: any) {
   socket.join(data)
 }
 
+async function uploadToCloud(buffer: Buffer) {
+  const stream = Readable.from(buffer)
+
+  return new Promise<string | undefined>((resolve, reject) => {
+    const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
+      { folder: 'buzzline', resource_type: 'auto', secure: true },
+      (err, res) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(res?.secure_url)
+        }
+      }
+    )
+    stream.pipe(cldUploadStream)
+  })
+}
+
 async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   const user = await User.findById(socket.userId)
   if (!user) {
@@ -64,21 +82,8 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     }
 
     // Upload audio file to Cloudinary
-    const stream = Readable.from(voiceClipBuffer)
     try {
-      voiceClipUrl = await new Promise((resolve, reject) => {
-        const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
-          { folder: 'buzzline', resource_type: 'auto', secure: true },
-          (err, res) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(res?.secure_url)
-            }
-          }
-        )
-        stream.pipe(cldUploadStream)
-      })
+      voiceClipUrl = await uploadToCloud(voiceClipBuffer)
     } catch (e) {
       return socket.emit('error', 'Error uploading voice clip')
     }
@@ -95,21 +100,8 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     }
 
     // Upload image to Cloudinary
-    const stream = Readable.from(imageBuffer)
     try {
-      imageUrl = await new Promise((resolve, reject) => {
-        const cldUploadStream = cloudinaryInstance.uploader.upload_stream(
-          { folder: 'buzzline', resource_type: 'auto', secure: true },
-          (err, res) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(res?.secure_url)
-            }
-          }
-        )
-        stream.pipe(cldUploadStream)
-      })
+      imageUrl = await uploadToCloud(imageBuffer)
     } catch (e) {
       return socket.emit('error', 'Error uploading image')
     }
