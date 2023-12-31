@@ -127,6 +127,17 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   socket.to(data.chat).emit('message', message)
 }
 
+async function handleTyping(socket: CustomSocket, data: any) {
+  const user = await User.findById(socket.userId)
+  if (!user) {
+    return
+  }
+
+  const isTyping = data.isTyping
+
+  socket.to(data.chat).emit('typing', { userId: user._id, isTyping })
+}
+
 export default function (server: S<typeof IncomingMessage, typeof ServerResponse>) {
   const io = new Server(server, { cors: { origin: 'http://localhost:3000' }, maxHttpBufferSize: 5e6 }) // 5mb max buffer size
 
@@ -158,6 +169,8 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
     customSocket.on('joinRoom', (data) => handleJoinRoom(customSocket, data))
 
     customSocket.on('message', async (data) => await handleMessage(customSocket, io, data))
+
+    customSocket.on('typing', async (data) => await handleTyping(customSocket, data))
 
     customSocket.on('notification', (data) => {
       io.to(data.to).emit('notification', data)
