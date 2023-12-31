@@ -21,11 +21,21 @@ export const index = [
       return
     }
 
-    const messages = await Message.find({ chat: chat._id })
-      .sort({ createdAt: 1 })
-      .populate('sender', 'firstName lastName avatarUrl')
-      .populate('readBy', 'firstName lastName')
+    let { page = 1, limit = 20 } = req.query
 
-    res.json(messages)
+    const paginateOptions = {
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      populate: [
+        { path: 'sender', select: 'firstName lastName avatarUrl' },
+        { path: 'readBy', select: 'firstName lastName' },
+      ],
+    }
+
+    // @ts-ignore
+    const result = await Message.paginate({ chat: chatId }, paginateOptions)
+
+    res.json(result)
   }),
 ]
