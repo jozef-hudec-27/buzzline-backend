@@ -7,9 +7,18 @@ const messageSchema = new mongoose.Schema({
   content: { type: String, maxlength: 500, default: '' },
   voiceClipUrl: { type: String },
   imageUrl: { type: String },
+  isRemoved: { type: Boolean },
   readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
   createdAt: { type: Date, default: Date.now },
 })
+
+messageSchema.methods.publicIdOf = function (asset: 'voiceClip' | 'image') {
+  const url = asset === 'voiceClip' ? this.voiceClipUrl : this.imageUrl
+
+  if (!url) return
+
+  return url.split('/').pop()?.split('.')[0]
+}
 
 messageSchema.plugin(mongoosePaginate)
 

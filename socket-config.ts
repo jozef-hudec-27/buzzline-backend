@@ -138,6 +138,25 @@ async function handleTyping(socket: CustomSocket, data: any) {
   socket.to(data.chat).emit('typing', { userId: user._id, isTyping })
 }
 
+async function handleMessageRemove(socket: CustomSocket, data: any) {
+  const { chat, messageId } = data
+
+  const message = await Message.findOne({ _id: messageId, chat: chat })
+  if (!message || message.sender.toString() !== socket.userId) {
+    return socket.emit('error', 'Message not found')
+  }
+
+  // Delete media from the cloud
+  if (message.voiceClipUrl || message.imageUrl) {
+    // @ts-ignore
+    cloudinaryInstance.uploader.destroy(`buzzline/${message.publicIdOf(message.voiceClipUrl ? 'voiceClip' : 'image')}`)
+  }
+
+    await Message.findByIdAndUpdate(message._id, { isRemoved: true, content: '', voiceClipUrl: null, imageUrl: null })
+
+  socket.to(chat).emit('messageRemove', { messageId })
+}
+
 export default function (server: S<typeof IncomingMessage, typeof ServerResponse>) {
   const io = new Server(server, { cors: { origin: 'http://localhost:3000' }, maxHttpBufferSize: 5e6 }) // 5mb max buffer size
 
@@ -171,6 +190,8 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
     customSocket.on('message', async (data) => await handleMessage(customSocket, io, data))
 
     customSocket.on('typing', async (data) => await handleTyping(customSocket, data))
+
+    customSocket.on('messageRemove', async (data) => await handleMessageRemove(customSocket, data))
 
     customSocket.on('notification', (data) => {
       io.to(data.to).emit('notification', data)
