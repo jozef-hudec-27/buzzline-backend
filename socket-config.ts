@@ -158,7 +158,7 @@ async function handleMessageRemove(socket: CustomSocket, data: any) {
 }
 
 export default function (server: S<typeof IncomingMessage, typeof ServerResponse>) {
-  const io = new Server(server, { cors: { origin: 'http://localhost:3000' }, maxHttpBufferSize: 5e6 }) // 5mb max buffer size
+  const io = new Server(server, { cors: { origin: process.env.CLIENT_URL }, maxHttpBufferSize: 5e6 }) // 5mb max buffer size
 
   //   attach user to socket
   io.use((socket, next) => {

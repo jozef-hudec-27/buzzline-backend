@@ -5,6 +5,9 @@ import logger from 'morgan'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import passport from 'passport'
+import compression from 'compression'
+import helmet from 'helmet'
+import { rateLimit } from 'express-rate-limit'
 
 import dbConnect from './mongo-config.js'
 import passportConfig from './passport-config.js'
@@ -26,6 +29,14 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(passport.initialize())
+app.use(compression())
+app.use(helmet())
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 200,
+  })
+)
 
 app.use('/api', apiRouter)
 app.use('/auth', authRouter)
