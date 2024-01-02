@@ -9,15 +9,15 @@ function checkTokenExpiration(
 ): Response<any, Record<string, any>> | undefined {
   const token = req.headers.authorization?.split(' ')[1]
 
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized.' })
+  if (!token || token === 'null') {
+    return res.status(401).json({ message: 'Token missing' })
   }
 
   jwt.verify(token, process.env.JWT_SECRET || '', (err, decoded) => {
     if (err && err.name === 'TokenExpiredError') {
       return res.status(401).json({ message: 'Token expired' })
     } else if (err) {
-      return res.status(401).json({ message: 'Invalid token' })
+      return res.status(401).json({ message: 'Token invalid' })
     }
 
     next()

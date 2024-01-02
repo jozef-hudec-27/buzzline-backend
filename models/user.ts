@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema<User>({
   passwordEncrypted: { type: String, required: true },
   refreshTokens: { type: [String], default: [] },
   chatToken: { type: String, unique: true }, // Used to create chat with user
-  avatarUrl: { type: String, default: process.env.DEFAULT_AVATAR_URL },
+  avatarUrl: { type: String },
 })
 
 userSchema.pre('save', async function (next) {

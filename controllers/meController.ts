@@ -21,7 +21,9 @@ export const updateAvatar = [
     const user = req.user as TUser
 
     // Delete old avatar from the cloud
-    cloudinaryInstance.uploader.destroy(`buzzline/${user.avatarPublicId}`)
+    if (user.avatarUrl) {
+      cloudinaryInstance.uploader.destroy(`buzzline/${user.avatarPublicId}`)
+    }
 
     await User.findByIdAndUpdate(user._id, { avatarUrl: filePath })
 
