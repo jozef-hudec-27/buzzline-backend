@@ -23,13 +23,7 @@ import authRouter from './routers/authRouter.js'
 const app: Express = express()
 
 // middleware
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
-app.use(passport.initialize())
-app.use(compression())
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true, optionsSuccessStatus: 200, allowedHeaders: ['Content-Type', 'Authorization'] }))
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -41,6 +35,12 @@ app.use(
     limit: 200,
   })
 )
+app.use(logger('dev'))
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(cookieParser())
+app.use(passport.initialize())
+app.use(compression())
 
 app.use('/api', apiRouter)
 app.use('/auth', authRouter)
