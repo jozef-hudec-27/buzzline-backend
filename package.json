@@ -9,9 +9,9 @@
   },
   "scripts": {
     "build": "rimraf dist && npx tsc",
-    "prestart": "npm run build",
+    "prestart": "yarn build",
     "start": "node dist/bin/index.js",
-    "predev": "npm run build",
+    "predev": "yarn build",
     "dev": "concurrently \"npx tsc -w\"  \"nodemon dist/bin/index.js\""
   },
   "dependencies": {
