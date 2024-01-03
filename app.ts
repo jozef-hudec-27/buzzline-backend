@@ -23,11 +23,11 @@ import authRouter from './routers/authRouter.js'
 const app: Express = express()
 
 // middleware
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(passport.initialize())
 app.use(compression())
 app.use(
