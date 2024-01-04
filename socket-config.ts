@@ -77,7 +77,8 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     }
 
     const type = await fileTypeFromBuffer(voiceClipBuffer)
-    if (!type || type.ext !== 'webm') {
+    // if (!type || type.ext !== 'webm') {
+    if (!type) {
       return socket.emit('error', 'Invalid voice clip')
     }
 
