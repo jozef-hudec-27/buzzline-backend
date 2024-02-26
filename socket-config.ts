@@ -123,7 +123,7 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   await Chat.findByIdAndUpdate(data.chat, { newestMessage: message._id })
 
   message = await message.save()
-  message = await message.populate('sender', 'firstName lastName')
+  message = await message.populate('sender', 'firstName lastName avatarUrl')
 
   socket.to(data.chat).emit('message', message)
 }
@@ -153,7 +153,7 @@ async function handleMessageRemove(socket: CustomSocket, data: any) {
     cloudinaryInstance.uploader.destroy(`buzzline/${message.publicIdOf(message.voiceClipUrl ? 'voiceClip' : 'image')}`)
   }
 
-    await Message.findByIdAndUpdate(message._id, { isRemoved: true, content: '', voiceClipUrl: null, imageUrl: null })
+  await Message.findByIdAndUpdate(message._id, { isRemoved: true, content: '', voiceClipUrl: null, imageUrl: null })
 
   socket.to(chat).emit('messageRemove', { messageId })
 }
@@ -194,8 +194,8 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
 
     customSocket.on('messageRemove', async (data) => await handleMessageRemove(customSocket, data))
 
-    customSocket.on('notification', (data) => {
-      io.to(data.to).emit('notification', data)
+    customSocket.on('dm', (data) => {
+      io.to(data.to).emit('dm', data)
     })
 
     customSocket.on('onlineStatusResponse', (data) => {

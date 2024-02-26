@@ -23,7 +23,7 @@ import authRouter from './routers/authRouter.js'
 const app: Express = express()
 
 // middleware
-app.use(cors({ origin: process.env.CLIENT_URL, credentials: true, optionsSuccessStatus: 200, allowedHeaders: ['Content-Type', 'Authorization'] }))
+app.use(cors({ origin: process.env.CLIENT_URL, credentials: true }))
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
