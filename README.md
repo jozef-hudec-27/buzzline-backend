@@ -6,18 +6,15 @@
 
 <br>
 
-BuzzLine is a real-time messaging web application. Features include live messages and notifications, voice clip recording, online status tracking and more. Visit at [https://buzzline.live](https://buzzline.live).
+BuzzLine is a real-time messaging and calling web application. Features include audio/video call, live messages and notifications, voice clip recording and more. Visit at [https://buzzline.live](https://buzzline.live).
 
 <br>
-
 <div>
 <img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1706466973/buzzline-register_tiicij.png" alt="Buzzline register page" width="500"/>
 
-<img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1706466973/buzzline-login_mqvazn.png" alt="Buzzline register page" width="500"/>
+<img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1709373061/buzzline-chat-2_xtw2mh.png" alt="Buzzline dashboard" width="500"/>
 
-<img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1706466974/buzzline-voice-clip_f1djp6.png" alt="Buzzline register page" width="500"/>
-
-<img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1706466974/buzzline-remove-msg_grxdkq.png" alt="Buzzline register page" width="500"/>
+<img class="hero__app-preview-photo" src="https://res.cloudinary.com/dsbky2fbe/image/upload/v1709377232/buzzline-current-call_eo6yup.png" alt="Buzzline video call" width="500"/>
 </div>
 <br/>
 
@@ -90,4 +87,4 @@ CLOUDINARY_API_SECRET=<YOUR CLOUDINARY API SECRET>
 yarn dev
 ```
 
-Open [http://localhost:4000](http://localhost:4000) and voila!
+Open [http://127.0.0.1:4000](http://127.0.0.1:4000) and voila!
