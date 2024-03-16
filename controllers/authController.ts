@@ -1,8 +1,11 @@
-import User from '../models/user.js'
 import { body, validationResult } from 'express-validator'
 import asyncHandler from 'express-async-handler'
 import bcrypt from 'bcryptjs'
 import jwt, { JwtPayload } from 'jsonwebtoken'
+
+import User from '../models/user.js'
+import { ACCESS_TOKEN_EXPIRATION } from '../config.js'
+
 import { Request, Response, NextFunction, CookieOptions } from 'express'
 
 const REFRESH_TOKEN_COOKIE_OPTIONS: CookieOptions = {
@@ -10,6 +13,8 @@ const REFRESH_TOKEN_COOKIE_OPTIONS: CookieOptions = {
   maxAge: 604800000,
   secure: true,
   sameSite: 'none',
+  //   @ts-ignore
+  partitioned: true,
 }
 
 export const register = [
@@ -80,7 +85,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 
   // Access token expires in 20 minutes
   const accessToken = jwt.sign({ user: { email, _id } }, process.env.JWT_SECRET || '' || '', {
-    expiresIn: 1200,
+    expiresIn: ACCESS_TOKEN_EXPIRATION,
   })
   const refreshToken = jwt.sign({ user: { _id } }, process.env.JWT_SECRET || '', { expiresIn: '7d' })
 
@@ -145,7 +150,7 @@ export const refresh = [
 
       const { email, _id } = user
       const accessToken = jwt.sign({ user: { email, _id } }, process.env.JWT_SECRET || '', {
-        expiresIn: 1200,
+        expiresIn: ACCESS_TOKEN_EXPIRATION,
       })
 
       res.json({ accessToken })
