@@ -26,6 +26,8 @@ export const index = [
     })
 
     chats.forEach((chat) => {
+      if (chat.isAI) return
+
       chat.users = chat.users.filter((u) => u._id.toString() !== user._id.toString())
     })
 
@@ -50,7 +52,7 @@ export const show = [
       return
     }
 
-    chat.users = chat.users.filter((u) => u._id.toString() !== user._id.toString())
+    chat.users = chat.isAI ? chat.users : chat.users.filter((u) => u._id.toString() !== user._id.toString())
 
     res.json(chat)
   }),

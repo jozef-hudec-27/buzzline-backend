@@ -1,6 +1,9 @@
 import mongoose from 'mongoose'
 import crypto from 'crypto'
 
+import UserAI from './userAI.js'
+import Chat from './chat.js'
+
 export type User = {
   email: string
   firstName: string
@@ -27,6 +30,14 @@ userSchema.pre('save', async function (next) {
   if (this.isNew) {
     this.chatToken = await generateChatToken()
   }
+
+  next()
+})
+
+// Create UserAI on User creation
+userSchema.post('save', async function (doc, next) {
+  await UserAI.create({ user: doc._id })
+  await Chat.create({ users: [doc._id], isAI: true })
 
   next()
 })
