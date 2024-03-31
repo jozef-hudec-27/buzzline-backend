@@ -6,6 +6,7 @@ import { Readable } from 'stream'
 
 import Message from './models/message.js'
 import User from './models/user.js'
+import UserAI from './models/userAI.js'
 import Chat from './models/chat.js'
 import { cloudinaryInstance } from './cloudinary-config.js'
 
@@ -128,6 +129,30 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
   socket.to(data.chat).emit('message', message)
 }
 
+async function handleAIMessage(socket: CustomSocket, data: any) {
+  const user = await User.findById(socket.userId)
+  if (!user) return
+
+  const ai = await UserAI.findOne({ user: user._id })
+  if (!ai) return
+
+  let message = new Message({
+    chat: data.chat,
+    sender: ai._id,
+    content: data.content,
+    // @ts-ignore
+    readBy: [user._id],
+    isAI: true,
+  })
+
+  await Chat.findByIdAndUpdate(data.chat, { newestMessage: message._id })
+
+  message = await message.save()
+  message = await message.populate('sender', '_id')
+
+  socket.to(data.chat).emit('message', message)
+}
+
 async function handleTyping(socket: CustomSocket, data: any) {
   const user = await User.findById(socket.userId)
   if (!user) {
@@ -189,6 +214,8 @@ export default function (server: S<typeof IncomingMessage, typeof ServerResponse
     customSocket.on('joinRoom', (data) => handleJoinRoom(customSocket, data))
 
     customSocket.on('message', async (data) => await handleMessage(customSocket, io, data))
+
+    customSocket.on('AIMessage', async (data) => await handleAIMessage(customSocket, data))
 
     customSocket.on('typing', async (data) => await handleTyping(customSocket, data))
 
