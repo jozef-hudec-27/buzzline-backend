@@ -9,6 +9,7 @@ import User from './models/user.js'
 import UserAI from './models/userAI.js'
 import Chat from './models/chat.js'
 import { cloudinaryInstance } from './cloudinary-config.js'
+import { MAX_MSG_LENGTH } from './config.js'
 
 interface CustomSocket extends Socket {
   userId: string
@@ -107,14 +108,14 @@ async function handleMessage(socket: CustomSocket, io: Server, data: any) {
     } catch (e) {
       return socket.emit('error', 'Error uploading image')
     }
-  } else if (data.content?.length > 500) {
+  } else if (data.content?.length > MAX_MSG_LENGTH) {
     return socket.emit('error', 'Message is too long')
   }
 
   let message = new Message({
     chat: data.chat,
     sender: user._id,
-    content: data.content || '',
+    content: data.content.slice(0, MAX_MSG_LENGTH) || '',
     voiceClipUrl: voiceClipUrl,
     imageUrl: imageUrl,
     // @ts-ignore
@@ -139,7 +140,7 @@ async function handleAIMessage(socket: CustomSocket, data: any) {
   let message = new Message({
     chat: data.chat,
     sender: ai._id,
-    content: data.content,
+    content: data.content.slice(0, MAX_MSG_LENGTH),
     // @ts-ignore
     readBy: [user._id],
     isAI: true,

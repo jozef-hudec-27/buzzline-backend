@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 import mongoosePaginate from 'mongoose-paginate-v2'
 
+import { MAX_MSG_LENGTH } from '../config.js'
+
 const messageSchema = new mongoose.Schema({
   chat: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat', required: true },
   sender: {
@@ -11,7 +13,7 @@ const messageSchema = new mongoose.Schema({
     },
     required: true,
   },
-  content: { type: String, maxlength: 500, default: '' },
+  content: { type: String, maxlength: MAX_MSG_LENGTH, default: '' },
   voiceClipUrl: { type: String },
   imageUrl: { type: String },
   isRemoved: { type: Boolean },
